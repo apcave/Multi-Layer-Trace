@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "complex": "cpp",
+    "__hash_table": "cpp",
+    "deque": "cpp",
+    "bitset": "cpp",
+    "typeinfo": "cpp",
+    "vector": "cpp"
+  }
+}
