@@ -22,19 +22,18 @@ class Wave
     };
 
     public:
+        Wave() : type(Type::P), p(0.0f, 0.0f), angle(0.0f) {} // Default ructor
         Wave(Type type, std::complex<float> p, float angle)
             : type(type), p(p), angle(angle) {}
 
-        bool operator==(const Wave& other) const;
+        bool operator==( Wave& other) ;
         void clear();
-        void accumulate(const Wave& other);
+        void accumulate( Wave& other);
 
 
-    private:
-
-
+    public:
         Type type;              // Wave type (P or S)
         std::complex<float> p;  // Pressure amplitude
         static float omega;     // Angular frequency in radians per second
         float angle;            // Angle of incidence in radians
-}
+};

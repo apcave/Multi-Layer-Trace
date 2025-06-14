@@ -1,20 +1,17 @@
 #include "Material.hpp"
 
 
-void Material::propergateForward(const Wave& wave)
+void Material::propergateForward(Wave& wave)
 {
     // The wave is inside the material at the top interface.
 
     // Attenuate the wave for transmission through the material.
-    Wave wave = attenuateForTransmission(wave);
+    Wave wave_t = attenuateForTransmission(wave);
 
     // Split the wave at the bottom interface.
-    wave = attenuateForTransmission(wave);
+    std::vector<Wave> ir = boundaryTop.getSplitWaves(wave);
 
-    // Split the wave at the bottom interface.
-    vector<Wave> ir = boundaryTop.getSplitWaves(wave);
-
-    addWaveBottom(ir[0], ir[1]);
+    addWavesBottom(ir[0], ir[1]);
 
     // The bottom of this material is the top of the medium below.
     mediumBelow->addWavesTop(ir[2], ir[3]); 
@@ -22,7 +19,7 @@ void Material::propergateForward(const Wave& wave)
 
 
 
-void Material::propergateBackward(const Wave& wave)
+void Material::propergateBackward(Wave& wave)
 {
     // The wave is inside the material at the bottom interface.
 
@@ -30,9 +27,9 @@ void Material::propergateBackward(const Wave& wave)
     wave = attenuateForTransmission(wave);
 
     // Split the wave at the top interface.
-    vector<Wave> ir = boundaryTop.getSplitWaves(wave);
+    std::vector<Wave> ir = boundaryTop.getSplitWaves(wave);
     
-    addWaveTop(ir[0], ir[1]);
+    addWavesTop(ir[0], ir[1]);
 
     // The top of this material is the bottom of the medium above.
     mediumAbove->addWavesBottom(ir[2], ir[3]);
@@ -40,7 +37,7 @@ void Material::propergateBackward(const Wave& wave)
 
 
 
-void Material::addWavesTop(Wave& tp, const Wave& ts)
+void Material::addWavesTop(Wave& tp,  Wave& ts)
 {
     // Waves transmitted through the interface are treated the same as reflected waves.    
     matchWave(tp, rp_i1_f);
@@ -98,14 +95,13 @@ void Material::stepWaves()
     }
 }
 
-
-void Material::matchWave(const Wave& wave, vector<Wave>& waveVector)
+Wave Material::attenuateForTransmission(Wave& wave_in)
 {
-    for (auto& w : waveVector) {
-        if( wave == w ) {
-            w.accumulate(wave);
-            return;
-        }
-    }
-    waveVector.push_back(wave);
+    // Attenuate the wave for transmission through the material.
+    // This is a simple model where the wave is attenuated by a factor of 1/e per wavelength.
+    // The attenuation factor is based on the wave's type (P or S) and the material's properties.
+
+    Wave wave_out = wave_in; 
+
+    return wave_out;
 }

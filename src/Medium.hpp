@@ -14,7 +14,9 @@ class Medium
         virtual ~Medium() = default;
 
         // Pure virtual function to be implemented by derived classes
-        virtual void stepWaves() = 0;
+        virtual void stepWaves() {};
+
+        void initialWave(Wave& wave);
 
     public:
         enum class Type
@@ -24,7 +26,7 @@ class Medium
             Bottom
         };
 
-    protected:
+    public:
         void matchWave(Wave& wave, std::vector<Wave>& waveVector);
         virtual void addWavesTop(Wave& tp, Wave& ts);
         virtual void addWavesBottom(Wave& tp, Wave& ts);
@@ -40,13 +42,17 @@ class Medium
         float att_p; // Attenuation for P-wave
         float att_s; // Attenuation for S-wave
 
-        std::complex k_p; // Complex wave number for P-wave
-        std::complex k_s; // Complex wave number for S-wave
+        std::complex<float> k_p; // Complex wave number for P-wave
+        std::complex<float> k_s; // Complex wave number for S-wave
 
         std::vector<Wave> surface_rp; // P-wave on the surface Top or Bottom
         std::vector<Wave> surface_rs; // S-wave on the surface Top or Bottom
 
         // Note that mediums many only have on interface set.
-        Interface boundryTop;
-        Interface boundryBottom;
+        Interface boundaryTop;
+        Interface boundaryBottom;
+
+        Medium* mediumAbove; // Pointer to the medium above this one
+        Medium* mediumBelow; // Pointer to the medium below this one
+ 
 };

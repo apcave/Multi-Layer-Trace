@@ -2,7 +2,7 @@
 
 
 
-std::vector<Wave> Interface::getSplitWaves(const Wave& wave)
+std::vector<Wave> Interface::getSplitWaves( Wave& wave)
 {
     Wave rp;
     Wave rs;
@@ -18,4 +18,15 @@ std::vector<Wave> Interface::getSplitWaves(const Wave& wave)
     result.push_back(ts);
 
     return result;
+}
+
+
+void Interface::setFirstMedium(Medium* medium)
+{
+    firstMedium = medium;
+}
+
+void Interface::setSecondMedium(Medium* medium)
+{
+    secondMedium = medium;
 }
