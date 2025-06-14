@@ -46,6 +46,7 @@
     "string": "cpp",
     "string_view": "cpp",
     "unordered_map": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "valarray": "cpp"
   }
 }

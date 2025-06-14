@@ -1,13 +1,22 @@
 #include "Medium.hpp"
+#include <cmath>
+
+float Medium::eta = 40.0f * M_PI * std::log10(std::exp(1.0f));
+std::complex<float> Medium::j = std::complex<float>(0.0f, 1.0f); // Imaginary unit for complex calculations
 
 Medium::Medium(float thickness, float density, float cp, float cs, float att_p, float att_s)
 {
     this->t = thickness;   // Thickness in meters
     this->rho = density; // Density in kg/m^3
-    this->cp_r = cp; // Compression wave speed in m/s
-    this->cs_r = cs; // Shear wave speed in m/s
+    this->cp = cp; // Compression wave speed in m/s
+    this->cs = cs; // Shear wave speed in m/s
     this->att_p = att_p; // Attenuation for P-wave in dB/m
     this->att_s = att_s; // Attenuation for S-wave in dB/m
+
+    isSolid = true;
+    if (cs < 0.001f ) {
+        isSolid = false;
+    }
 }
 
 
@@ -58,4 +67,13 @@ void Medium::setLayerBelow(Medium* medium)
     mediumBelow = medium;
     boundaryBottom.setFirstMedium(this);
     boundaryBottom.setSecondMedium(medium);
+}
+
+void Medium::calculateWaveNumbers(float omega)
+{
+    k_p = (omega / cp ) * ( j *( att_p / eta ) + 1.0f);
+
+    if (isSolid ) {
+        k_s = (omega / cs ) * ( j *( att_s / eta ) + 1.0f);
+    }
 }

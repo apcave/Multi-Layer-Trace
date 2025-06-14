@@ -17,6 +17,9 @@ set(SRC_FILES
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 execute_process(
     COMMAND ${Python3_EXECUTABLE} -m pybind11 --cmakedir

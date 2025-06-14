@@ -11,38 +11,40 @@ namespace py = pybind11;
 
 Composite comp;
 
-std::vector<std::tuple<float, float, float>> getRp() {
+// Note Angles can be represented as complex number and evanesce is supported.
+
+std::vector<std::tuple<float, float, float, float>> getRp() {
     auto waves = comp.getRp();
-    std::vector<std::tuple<float, float, float>> result;
+    std::vector<std::tuple<float, float, float, float>> result;
     for (const auto& wave : waves) {
-        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle);
+        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle.real(), wave.angle.imag());
     }
     return result;
 }
 
-std::vector<std::tuple<float, float, float>> getRs() {
+std::vector<std::tuple<float, float, float, float>> getRs() {
     auto waves = comp.getRs();
-    std::vector<std::tuple<float, float, float>> result;
+    std::vector<std::tuple<float, float, float, float>> result;
     for (const auto& wave : waves) {
-        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle);
+        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle.real(), wave.angle.imag());
     }
     return result;
 }
 
-std::vector<std::tuple<float, float, float>> getTp() {
+std::vector<std::tuple<float, float, float, float>> getTp() {
     auto waves = comp.getTp();
-    std::vector<std::tuple<float, float, float>> result;
+    std::vector<std::tuple<float, float, float, float>> result;
     for (const auto& wave : waves) {
-        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle);
+        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle.real(), wave.angle.imag());
     }
     return result;
 }
 
-std::vector<std::tuple<float, float, float>> getTs() {
+std::vector<std::tuple<float, float, float, float>> getTs() {
     auto waves = comp.getTs();
-    std::vector<std::tuple<float, float, float>> result;
+    std::vector<std::tuple<float, float, float, float>> result;
     for (const auto& wave : waves) {
-        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle);
+        result.emplace_back(wave.p.real(),wave.p.imag(), wave.angle.real(), wave.angle.imag());
     }
     return result;
 }
