@@ -26,22 +26,36 @@ void Medium::matchWave(Wave& wave, std::vector<Wave>& waveVector)
 
 void Medium::addWavesTop(Wave& tp, Wave& ts)
 {
-    matchWave(tp, surface_rp);
-    matchWave(ts, surface_rs);
+    matchWave(tp, surface_pc);
+    matchWave(ts, surface_ps);
 }
 
 
 void Medium::addWavesBottom(Wave& tp, Wave& ts)
 {
-    matchWave(tp, surface_rp);
-    matchWave(ts, surface_rs);
+    matchWave(tp, surface_pc);
+    matchWave(ts, surface_ps);
 }
 
-void  Medium::initialWave(Wave& wave)
+void Medium::initialWave(Wave& wave)
 {
     std::vector<Wave> ir = boundaryBottom.getSplitWaves(wave);
 
     addWavesBottom(ir[0], ir[1]);
+}
 
+void Medium::setLayerAbove(Medium* medium)
+{
+    // Create the boundary conditions at the top of this medium.
+    mediumAbove = medium;
+    boundaryTop.setFirstMedium(this);
+    boundaryTop.setSecondMedium(medium);
+}
 
+void Medium::setLayerBelow(Medium* medium)
+{
+    // Create the boundary conditions at the bottom of this medium.
+    mediumBelow = medium;
+    boundaryBottom.setFirstMedium(this);
+    boundaryBottom.setSecondMedium(medium);
 }

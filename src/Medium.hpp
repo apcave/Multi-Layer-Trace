@@ -18,21 +18,14 @@ class Medium
 
         void initialWave(Wave& wave);
 
-    public:
-        enum class Type
-        {
-            Top,
-            Intermediate,
-            Bottom
-        };
+        void setLayerAbove(Medium* medium);
+        void setLayerBelow(Medium* medium);
 
     public:
         void matchWave(Wave& wave, std::vector<Wave>& waveVector);
         virtual void addWavesTop(Wave& tp, Wave& ts);
         virtual void addWavesBottom(Wave& tp, Wave& ts);
 
-    private:
-        Type mediumType; // Type of medium (Top, Intermediate, Bottom)
 
     protected:
         float t;   // Thickness Meters
@@ -45,14 +38,15 @@ class Medium
         std::complex<float> k_p; // Complex wave number for P-wave
         std::complex<float> k_s; // Complex wave number for S-wave
 
-        std::vector<Wave> surface_rp; // P-wave on the surface Top or Bottom
-        std::vector<Wave> surface_rs; // S-wave on the surface Top or Bottom
-
         // Note that mediums many only have on interface set.
         Interface boundaryTop;
         Interface boundaryBottom;
 
         Medium* mediumAbove; // Pointer to the medium above this one
         Medium* mediumBelow; // Pointer to the medium below this one
+
+    public:
+        std::vector<Wave> surface_pc; // P-wave on the surface of the medium
+        std::vector<Wave> surface_ps; // S-wave on the surface of the medium
  
 };
