@@ -1,5 +1,7 @@
 #include "Wave.hpp"
 
+float Wave::omega = 0.0f;
+
 bool Wave::operator==( Wave& other)  {
     return (type == other.type) && (abs(angle - other.angle) < 1e-6f) && (abs(p - other.p) < 1e-6f);
 }

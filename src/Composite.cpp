@@ -12,7 +12,8 @@ void Composite::properateWave( Wave& wave) {
         return;
     }
 
-    //mediums[0].propergateForward(wave);
+    // Note zero is the top of the composite.
+    mediums[0].initialWave(wave);
 
 }
 

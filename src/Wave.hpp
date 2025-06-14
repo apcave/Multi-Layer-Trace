@@ -15,11 +15,12 @@
 
 class Wave
 {
-    enum class Type
-    {
-        P, // Primary wave
-        S, // Secondary wave
-    };
+    public:
+        enum class Type
+        {
+            P, // Primary wave
+            S, // Secondary wave
+        };
 
     public:
         Wave() : type(Type::P), p(0.0f, 0.0f), angle(0.0f) {} // Default ructor

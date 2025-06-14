@@ -1,9 +1,9 @@
+import math
+import numpy as np
 import sys, os
 sys.path.append(os.path.abspath('./build'))
 
-import composite_wave_response
-
-comp = composite_wave_response.Composite()
+from composite_wave_response import makeComposite, properateWave
 
 
 # void makeComposite( std::vector<float>& thickness,  std::vector<float>& density,
@@ -20,5 +20,11 @@ att_p = [0.01, 0.02, 0.01]
 cs = [ 0.0, 3235.0, 0.0 ]
 att_s = [ 0.0, 0.05, 0.0 ]
 
-comp.makeComposite(thinkness, density, cp, cs, att_p, att_s)
+angle = 30.0
+frequency = 30.0e3
+isShear = False
 
+makeComposite(thinkness, density, cp, cs, att_p, att_s)
+
+properateWave(1.0, 0.0, float(math.radians(angle)),
+              int(isShear), float(frequency))
