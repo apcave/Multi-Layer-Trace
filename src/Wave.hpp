@@ -1,6 +1,6 @@
 #pragma once
 #include <complex>
-
+#include <iostream>
 
 /*
     * Wave class respresents a pressure wave in a medium. 
@@ -30,6 +30,11 @@ class Wave
         bool operator==( Wave& other) ;
         void clear();
         void accumulate( Wave& other);
+        void print() const {
+            std::cout << "Wave Type: " << (type == Type::P ? "P" : "S") 
+                      << ", Pressure: " << p 
+                      << ", Angle: " << angle << std::endl;
+        }
 
 
     public:

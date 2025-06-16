@@ -10,21 +10,22 @@ from composite_wave_response import makeComposite, properateWave
 #                     std::vector<float>& cp,  std::vector<float>& cs,
 #                     std::vector<float>& att_p,  std::vector<float>& att_s);
 
-thinkness = [0.0, 5e-3, 0.0]
+
+thickness = [0.0, 5e-3, 0.0]
 
 density = [1000.0, 7850.0, 1000.0]
 
-cp = [1480.0, 5960.0, 1480.0]
+cp =      [1480.0, 5960.0, 1480.0]
 att_p = [0.01, 0.02, 0.01]
 
-cs = [ 0.0, 3235.0, 0.0 ]
+cs =    [ 0.0, 3235.0, 0.0 ]
 att_s = [ 0.0, 0.05, 0.0 ]
 
-angle = 30.0
-frequency = 30.0e3
+angle = 0.0
+frequency = 1.0e3
 isShear = False
 
-makeComposite(thinkness, density, cp, cs, att_p, att_s)
+makeComposite(thickness, density, cp, cs, att_p, att_s)
 
 properateWave(1.0, 0.0, float(math.radians(angle)),
               int(isShear), float(frequency))

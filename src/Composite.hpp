@@ -7,7 +7,7 @@
 class Composite {
 
     public:
-        void addMaterial( Medium& material);
+        void addMaterial( Medium* material);
 
         void makeComposite( std::vector<float>& thickness,  std::vector<float>& density,
                            std::vector<float>& cp,  std::vector<float>& cs,
@@ -24,5 +24,5 @@ class Composite {
         std::vector<Wave> getTs();
 
     private:
-        std::vector<Medium> mediums;
+        std::vector<Medium*> mediums;
 };

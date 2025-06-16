@@ -10,7 +10,7 @@ class Material : public Medium
 {
     public:
         Material(float thickness, float density, float cp, float cs, float att_p, float att_s)
-            : Medium(thickness, density, cp, cs, att_p, att_s) {}
+            : Medium(density, cp, cs, att_p, att_s) {this->thickness = thickness; }
 
         void setAdjacentMediums(Material* above, Material* below) {
             mediumAbove = above;
@@ -18,10 +18,10 @@ class Material : public Medium
         }
 
         virtual ~Material() = default;
+        bool stepWaves() override;
+        void clearWaves() override;
 
-
-    protected:
-        virtual void stepWaves() override;
+    protected:        
 
         // Propagate the wave forward through the material
         void propergateForward( Wave& wave);
@@ -35,12 +35,13 @@ class Material : public Medium
         // Add waves at the bottom interface
         virtual void addWavesBottom(Wave& tp, Wave& ts) override;
 
-
     private:
         Wave attenuateForTransmission(Wave& wave_in);    
+        void printWaves();
     
     private:
-        float minP = 1.0e-6; // Minimum amplitude for wave propagation
+        float minP = 1.0e-12; // Minimum amplitude for wave propagation
+        float thickness; // Thickness of the material in meters
 
 
         // Top side iterface waves.

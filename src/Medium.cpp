@@ -4,9 +4,8 @@
 float Medium::eta = 40.0f * M_PI * std::log10(std::exp(1.0f));
 std::complex<float> Medium::j = std::complex<float>(0.0f, 1.0f); // Imaginary unit for complex calculations
 
-Medium::Medium(float thickness, float density, float cp, float cs, float att_p, float att_s)
+Medium::Medium( float density, float cp, float cs, float att_p, float att_s)
 {
-    this->t = thickness;   // Thickness in meters
     this->rho = density; // Density in kg/m^3
     this->cp = cp; // Compression wave speed in m/s
     this->cs = cs; // Shear wave speed in m/s
@@ -19,6 +18,10 @@ Medium::Medium(float thickness, float density, float cp, float cs, float att_p, 
     }
 }
 
+bool Medium::stepWaves() { 
+    // std::cout << "Medium::stepWaves() called" << std::endl;
+    return true;
+}
 
 
 void Medium::matchWave(Wave& wave, std::vector<Wave>& waveVector)
@@ -48,9 +51,12 @@ void Medium::addWavesBottom(Wave& tp, Wave& ts)
 
 void Medium::initialWave(Wave& wave)
 {
+
     std::vector<Wave> ir = boundaryBottom.getSplitWaves(wave);
 
-    addWavesBottom(ir[0], ir[1]);
+
+    addWavesTop(ir[0], ir[1]);
+    mediumBelow->addWavesTop(ir[2], ir[3]);
 }
 
 void Medium::setLayerAbove(Medium* medium)
@@ -71,9 +77,18 @@ void Medium::setLayerBelow(Medium* medium)
 
 void Medium::calculateWaveNumbers(float omega)
 {
-    k_p = (omega / cp ) * ( j *( att_p / eta ) + 1.0f);
+    //k_p = (omega / cp ) * ( j *( att_p / eta ) + 1.0f);
+    k_p = omega / std::complex<float>(cp, att_p);
 
     if (isSolid ) {
-        k_s = (omega / cs ) * ( j *( att_s / eta ) + 1.0f);
+        //k_s = (omega / cs ) * ( j *( att_s / eta ) + 1.0f);
+        k_s = omega / std::complex<float>(cs, att_s);
+
     }
+}
+
+void Medium::clearWaves()
+{
+    surface_pc.clear();
+    surface_ps.clear();
 }

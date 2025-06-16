@@ -9,12 +9,13 @@
 class Medium
 {
     public:
-        Medium(float thickness, float density, float cp, float cs, float att_p, float att_s);
+        Medium(float density, float cp, float cs, float att_p, float att_s);
 
         virtual ~Medium() = default;
 
         // Pure virtual function to be implemented by derived classes
-        virtual void stepWaves() {};
+        virtual bool stepWaves();
+        virtual void clearWaves();
 
         void initialWave(Wave& wave);
 
