@@ -27,6 +27,8 @@ class Interface {
 
         void solidToSolid();
         void fluidToFluid();
+        void fluidToSolid();
+        void solidToFluid();
 
         cn M_1;
         cn M_2;

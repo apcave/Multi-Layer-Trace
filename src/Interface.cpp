@@ -19,29 +19,33 @@ void Interface::fluidToFluid()
     theta_tp = acos(k_ztp / k_tp);
 
 
-    Eigen::Matrix<cn, 2, 2> A; 
-    A(0,0) = -k_zp; // z-axis velocity 
-    A(0,1) = -k_ztp;
+    // Eigen::Matrix<cn, 2, 2> A; 
+    // A(0,0) = -k_zp; // z-axis velocity 
+    // A(0,1) = -k_ztp;
 
-    A(1,0) = -M_1 * sq(k_p); // z-axis pressure
-    A(1,1) = M_2 * sq(k_tp);
+    // A(1,0) = -M_1 * sq(k_p); // z-axis pressure
+    // A(1,1) = M_2 * sq(k_tp);
 
-    //A(1,0) = rho_1;
-    //A(1,1) = -rho_2;
-    std::cout <<" A Matrix:\n" << A << std::endl;
-    //std::cout << "M_1: " << M_1 << ", M_2: " << M_2 << std::endl;
+    // Eigen::Matrix<cn, 2, 1> b;
+    // b(0) = -k_zp;
+    // b(1) = M_1 * sq(k_p); 
 
-    Eigen::Matrix<cn, 2, 1> b;
-    b(0) = -k_zp;
-    b(1) = M_1 * sq(k_p); 
-    //b(1) = -rho_1;
+    // float sc = std::max(std::abs(A(0,0)), std::abs(A(0,1)));
+    // sc = std::max(sc, std::abs(b(0,0)));
+    // A.row(0) /= sc;
+    // b(0)     /= sc;
 
-    std::cout << "b Vector:\n" << b << std::endl;
+    // sc = std::max(std::abs(A(1,0)), std::abs(A(1,1)));
+    // sc = std::max(sc, std::abs(b(1,0)));
+    // A.row(1) /= sc;
+    // b(1)     /= sc;        
 
-    Eigen::Matrix<cn, 2, 1> x;
-    x = A.colPivHouseholderQr().solve(b);
+    // Eigen::Matrix<cn, 2, 1> x;
+    // x = A.colPivHouseholderQr().solve(b);
 
-    std::cout << "Solution x:\n" << x << std::endl;
+    // std::cout <<" A Matrix:\n" << A << std::endl;
+    // std::cout << "b Vector:\n" << b << std::endl;
+    // std::cout << "Solution x:\n" << x << std::endl;
 
 
     tpp = 2.0f * rho_1 * k_zp / (k_ztp * rho_1 + k_zp * rho_2);
@@ -50,11 +54,13 @@ void Interface::fluidToFluid()
     printf("tpp : %f + %fi\n", real(tpp), imag(tpp));
     printf("rpp : %f + %fi\n", real(rpp), imag(rpp));
 
-    std::cout << rpp*A(0,0) + tpp*A(0,1) << " == " << b(0) << std::endl;
-    std::cout << rpp*A(1,0) + tpp*A(1,1) << " == " << b(1) << std::endl;
+   // std::cout << rpp*A(0,0) + tpp*A(0,1) << " == " << b(0) << std::endl;
+   // std::cout << rpp*A(1,0) + tpp*A(1,1) << " == " << b(1) << std::endl;
 
-    rp = x(0);
-    tp = x(1);
+    //rp = x(0);
+    //tp = x(1);
+    rp = rpp;
+    tp = tpp;
     rs = 0.0f;
     ts = 0.0f;
     theta_rs = 0.0f;
@@ -93,41 +99,6 @@ void Interface::solidToSolid()
     //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_zts.imag()));
     // }
 
-    // Eigen::Matrix<cn, 4, 4> A;
-    //     // Conservation of z-axis momentum
-    //     A(0,0) =  k_xp;  // rp
-    //     A(0,1) =  k_zrs;  // rs
-    //     A(0,2) = -k_xp;  // tp
-    //     A(0,3) =  k_zts;  // ts 
-
-    //     // Conservation of x-axis momentum, solids only.
-    //     A(1,0) =  k_zp;
-    //     A(1,1) = -k_xp;
-    //     A(1,2) =  k_ztp;
-    //     A(1,3) =  k_xp;
-
-    //     // Conservation of x-axis shear stress (pressure) solids only.
-    //     A(2,0) =   2.0f*mu_1*k_xp*k_zp;
-    //     A(2,1) =        mu_1*(sq(k_zrs)-sq(k_xp));
-    //     A(2,2) =   2.0f*mu_2*k_xp*k_ztp;
-    //     A(2,3) =  -2.0f*mu_2*(sq(k_zts)-sq(k_xp));
-
-    //     // Conservation of z-axis stress (pressure)
-    //     A(3,0) =  -(lambda_1*sq(k_p)+2.0f*mu_1*sq(k_zp)); // (eq. 156)
-    //     A(3,1) =   2.0f*mu_1*k_xp*k_zrs;
-    //     A(3,2) =    lambda_2*sq(k_tp)+2.0f*mu_2*sq(k_ztp);
-    //     A(3,3) =   2.0f*mu_2*k_xp*k_zts;
-
-    //     Eigen::Matrix<cn, 4, 1> b;
-
-    //     // Incident P-wave displacement and stress at z = 0
-    //     b(0) =  -k_xp;                                           // -∂ϕ_inc/∂z
-    //     b(1) =  k_zp;                                           // -∂ϕ_inc/∂x
-    //     b(2) =  2.0f * mu_1 * k_xp * k_zp;                             // -T_xz from incident P
-    //     b(3) = lambda_1 * sq(k_xp) + 2.0f * mu_1 * sq(k_zp);    // T_zz from incident P
-    //     std::cout << "b Vector:\n" << b << std::endl;
-
-    // Assuming cn is a complex number type (e.g., std::complex<float>)
     Eigen::Matrix<cn, 4, 4> A;
 
     // Row 0: Conservation of z-axis displacement (u_z continuity)
@@ -176,17 +147,17 @@ void Interface::solidToSolid()
         b(i)     /= sc;
     }
 
-    std::cout << "A Matrix:\n" << A << std::endl;
-    std::cout << "b Vector:\n" << b << std::endl;
     Eigen::Matrix<cn, 4, 1> x;
     x = A.colPivHouseholderQr().solve(b); 
-    std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
-    std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
-    std::cout << "Determinant of A: " << A.determinant() << std::endl;
-    std::cout << "Solution x:\n" << x << std::endl;
 
-    std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
-    std::cout << rpp*A(3,0) + tpp*A(3,2) << " == " << b(3) << std::endl;
+    // std::cout << "A Matrix:\n" << A << std::endl;
+    // std::cout << "b Vector:\n" << b << std::endl;
+    // std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
+    // std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
+    // std::cout << "Determinant of A: " << A.determinant() << std::endl;
+    // std::cout << "Solution x:\n" << x << std::endl;
+    // std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
+    // std::cout << rpp*A(3,0) + tpp*A(3,2) << " == " << b(3) << std::endl;
 
     rp = x(0);
     rs = x(1);
@@ -194,6 +165,88 @@ void Interface::solidToSolid()
     ts = x(3);    
 }
 
+void Interface::solidToFluid()
+{
+
+}
+
+void Interface::fluidToSolid()
+{
+    std::cout << "Catch all Solid - Solid P-wave reflection and transmission\n";
+
+    theta_p = theta; // The angle of the incident P-wave.
+    cn k_xp  = k_p*sin(theta_p);
+    cn k_zp  = k_p*cos(theta_p);
+
+    // For continuity of the x-axis component of the wave number vector.
+    // For small ∂x, ∂z values attenuation is negligible.  
+    cn k_ztp = pow(sq(k_tp) - sq(k_xp), 0.5f);
+    cn k_zts = pow(sq(k_ts) - sq(k_xp), 0.5f);
+
+    theta_rp = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
+    theta_tp = acos(k_ztp / k_tp);
+    theta_ts = acos(k_zts / k_ts);
+
+    // if (k_zrs.imag() > 0.0f) {
+    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_zrs.imag()));
+    // }
+    // if (k_ztp.imag() > 0.0f) {
+    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_ztp.imag()));
+    // }
+    // if (k_zts.imag() > 0.0f) {
+    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_zts.imag()));
+    // }
+
+    Eigen::Matrix<cn, 3, 3> A;
+
+    // Row 0: Conservation of z-axis displacement (u_z continuity)
+    A(0,0) =  k_zp;    // reflected P-wave (medium 1)
+    A(0,1) =  k_ztp;   // transmitted P-wave (medium 2)
+    A(0,2) =  k_xp;    // transmitted S-wave (medium 2)
+
+    // Row 1: Conservation of x-axis displacement (u_x continuity)
+    A(1,0) =  0;       // reflected P (decoupled)
+    A(1,1) = -k_xp;    // transmitted P
+    A(1,2) =  k_zts;   // transmitted S
+
+    // Row 3: Conservation of normal stress (T_zz continuity)
+    A(2,0) = -(lambda_1 * sq(k_p) + 2.0f * mu_1 * sq(k_zp));  // reflected P
+    A(2,1) =  M_2 * sq(k_tp);    // transmitted P
+    A(2,2) =  0;                    // transmitted S
+
+
+    Eigen::Matrix<cn, 3, 1> b;
+
+    // Incident P-wave displacement and stress at z = 0
+    b(0) = k_zp;                                              // -∂ϕ_inc/∂z
+    b(1) = 0;                                                 // -∂ϕ_inc/∂x (decoupled)
+    b(2) = (lambda_1 * sq(k_p) + 2.0f * mu_1 * sq(k_zp));    // T_zz from incident P
+
+    for (int i = 0; i < 3; ++i) {
+        float sc = std::max(std::abs(A(i,0)), std::abs(A(i,1)));
+        sc = std::max(sc, std::abs(A(i,2)));
+        sc = std::max(sc, std::abs(b(i)));
+        A.row(i) /= sc;
+        b(i)     /= sc;
+    }
+
+    Eigen::Matrix<cn, 3, 1> x;
+    x = A.colPivHouseholderQr().solve(b); 
+
+    std::cout << "A Matrix:\n" << A << std::endl;
+    std::cout << "b Vector:\n" << b << std::endl;
+    std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
+    std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
+    std::cout << "Determinant of A: " << A.determinant() << std::endl;
+    std::cout << "Solution x:\n" << x << std::endl;
+    //std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
+    //std::cout << rpp*A(3,0) + tpp*A(3,2) << " == " << b(3) << std::endl;
+
+    rp = x(0);
+    rs = 0;
+    tp = x(1); 
+    ts = x(2);    
+}
 
 
   
@@ -528,7 +581,7 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
         if (wave.type == Wave::Type::P) {
             fluidToFluid();
             solidToSolid();
-
+            solidToFluid();
  
 
         } else {
