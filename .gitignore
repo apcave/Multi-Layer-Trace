@@ -1,3 +1,3 @@
 build/
 *.mod
-modules/__pycache__/*
+scripts/modules/__pycache__/*

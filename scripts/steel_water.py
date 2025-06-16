@@ -63,7 +63,7 @@ def run_water_steel_simulation():
     frequency = np.linspace(100, 10e3, 100)  # Frequency in Hz
     frequency = [5.0e3]  # Single frequency for the test
     angle = [5]  # Angle in degrees
-    is_compression = True
+    is_compression = False
 
     composite.set_frequency(frequency)
     composite.set_angle(angle)

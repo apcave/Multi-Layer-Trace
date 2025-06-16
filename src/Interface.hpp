@@ -25,10 +25,13 @@ class Interface {
         Medium* firstMedium;  // Pointer to the first medium
         Medium* secondMedium; // Pointer to the second medium
 
-        void solidToSolid();
-        void fluidToFluid();
-        void fluidToSolid();
-        void solidToFluid();
+        void p_solidToSolid();
+        void p_fluidToFluid();
+        void p_fluidToSolid();
+        void p_solidToFluid();
+
+        void s_solidToSolid();
+        void s_solidToFluid();
 
         cn M_1;
         cn M_2;
