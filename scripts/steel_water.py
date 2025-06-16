@@ -50,8 +50,9 @@ def run_water_steel_simulation():
     cp = [1480.0, 5960.0]  # P-wave speed in m/s
     att_p = [0.01, 0.02]  # P-wave attenuation
     #att_p = [0.0, 0.0]
-    cs = [369.0, 3235.0]  # S-wave speed in m/s
-    #cs = [0.0, 0.0]  # S-wave speed in m/s
+    #cs = [369.0, 3235.0]  # S-wave speed in m/s
+    cs = [369.0, 0.0]  # S-wave speed in m/s
+    att_s = [0.1, 0.0]
     att_s = [0.1, 0.05]  # S-wave attenuation
     #att_s = [0.0, 0.0]
 
@@ -62,7 +63,7 @@ def run_water_steel_simulation():
     # Set frequency and angle for the simulation
     frequency = np.linspace(100, 10e3, 100)  # Frequency in Hz
     frequency = [5.0e3]  # Single frequency for the test
-    angle = [5]  # Angle in degrees
+    angle = [30]  # Angle in degrees
     is_compression = False
 
     composite.set_frequency(frequency)

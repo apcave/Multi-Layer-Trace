@@ -564,5 +564,67 @@ void Interface::s_solidToSolid()
 
 void Interface::s_solidToFluid()
 {
+    std::cout << "Solid - Fluid S-wave reflection and transmission\n";
 
+    theta_s = theta; // The angle of the incident P-wave.
+    cn k_xs  = k_s*sin(theta_s);
+    cn k_zs  = k_s*cos(theta_s);
+
+    // For continuity of the x-axis component of the wave number vector.
+    // For small ∂x, ∂z values attenuation is negligible.  
+    cn k_zrp = pow(sq(k_p)  - sq(k_xs), 0.5f);
+    cn k_ztp = pow(sq(k_tp) - sq(k_xs), 0.5f);
+    
+    theta_rs = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
+    theta_rp = acos(k_zrp / k_p);
+    theta_tp = acos(k_ztp / k_tp);
+    theta_ts = 0;
+
+    Eigen::Matrix<cn, 3, 3> A;
+
+    // Row 0: Conservation of x-axis displacement (u_z continuity)
+    A(0,0) =   k_xs;    // reflected P-wave (medium 1)
+    A(0,1) =   k_zs;    // reflected S-wave (medium 1)
+    A(0,2) =   0;       // (decoupled) transmitted P-wave (medium 2)
+    
+    // Row 1: Conservation of z-axis displacement (u_x continuity)
+    A(1,0) =   k_zrp;    // reflected P
+    A(1,1) =  -k_xs;   // reflected S
+    A(1,2) =   k_ztp;    // transmitted P
+    
+    // Row 2: Conservation of normal stress (T_zz continuity)
+    A(2,0) = -(lambda_1 * sq(k_p) + 2.0f * mu_1 * sq(k_zrp));  // reflected P
+    A(2,1) =  2.0f * mu_1 * k_xs * k_zs;                       // reflected S
+    A(2,2) =  M_2 * sq(k_tp);                                  // transmitted P
+    
+
+    Eigen::Matrix<cn, 3, 1> b;
+
+    // Incident P-wave displacement and stress at z = 0
+    b(0) =  k_zs;                                           // -∂ϕ_inc/∂z
+    b(1) =  k_xs;                                           // -∂ϕ_inc/∂x
+    b(2) =  2.0f * mu_1 * k_xs * k_zs;                      // T_zz from incident P
+
+    for (int i = 0; i < 3; ++i) {
+        float sc = std::max(std::abs(A(i,0)), std::abs(A(i,1)));
+        sc = std::max(sc, std::abs(A(i,2)));
+        sc = std::max(sc, std::abs(b(i)));
+        A.row(i) /= sc;
+        b(i)     /= sc;
+    }
+
+    Eigen::Matrix<cn, 3, 1> x;
+    x = A.colPivHouseholderQr().solve(b); 
+
+    std::cout << "A Matrix:\n" << A << std::endl;
+    std::cout << "b Vector:\n" << b << std::endl;
+    std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
+    std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
+    std::cout << "Determinant of A: " << A.determinant() << std::endl;
+    std::cout << "Solution x:\n" << x << std::endl;
+
+    rp = x(0);
+    rs = x(1);
+    tp = x(2); 
+    ts = 0; 
 }
