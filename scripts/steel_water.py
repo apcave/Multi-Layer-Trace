@@ -67,12 +67,13 @@ def make_solid_solid_solid():
 
 # make_water_steel_water()
 # make_water_fluid()
-make_solid_solid_solid()
+# make_solid_solid_solid()
+make_water_steel_water()
 # Set frequency and angle for the simulation
-frequency = np.linspace(100, 2e3, 101)  # Frequency in Hz
+#frequency = np.linspace(100, 20e3, 101)  # Frequency in Hz
 frequency = [10.0e3]  # Single frequency for the test
 #angle = np.linspace(0, 90, 91)  # Angle in degrees
-angle = [30]  # Angle in degrees
+angle = [5]  # Angle in degrees
 is_compression = True
 
 composite.set_frequency(frequency)

@@ -174,19 +174,15 @@ Wave Material::attenuateForTransmission(Wave& wave_in)
     // std::cout << "Attenuating wave for transmission through material." << std::endl;
     // std::cout << "In Wave  :" << std::endl;
     // wave_in.print();
-    std::cout << "Transmission :" << std::endl;
-
+    
     cn scale;
     Wave wave_out = wave_in;
     if (wave_in.type == Wave::Type::S) {
         scale = exp(j*k_s*distance);
         wave_out.p *= scale;
-        std::cout << "k_s: " << k_s << std::endl;
     } else {
         scale = exp(j*k_p*distance);
         wave_out.p *= scale;
-        std::cout << "k_p: " << k_p << std::endl;
-        std::cout << "test: " << j*k_p*distance << std::endl; 
     }
 
     if(abs(scale) - 1 > 1e-6 || isnan(wave_out.p.real()) || isnan(wave_out.p.imag())) {
@@ -205,11 +201,11 @@ Wave Material::attenuateForTransmission(Wave& wave_in)
     }
 
     
-
-    std::cout << "Scale: " << scale << ", " << abs(scale) << std::endl;
-    std::cout << "Distance: " << distance << std::endl;
-    wave_in.print();
-    wave_out.print();
+    // std::cout << "Transmission :" << std::endl;
+    // std::cout << "Scale: " << scale << ", " << abs(scale) << std::endl;
+    // std::cout << "Distance: " << distance << std::endl;
+    // wave_in.print();
+    // wave_out.print();
 
 
     return wave_out;

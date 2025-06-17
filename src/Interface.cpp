@@ -184,22 +184,22 @@ void Interface::p_solidToFluid()
     // For small ∂x, ∂z values attenuation is negligible.  
     cn k_zrs = pow(sq(k_s)  - sq(k_xp), 0.5f);
     cn k_ztp = pow(sq(k_tp) - sq(k_xp), 0.5f);
-    cn k_zts = pow(sq(k_ts) - sq(k_xp), 0.5f);
 
     theta_rp = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
-    theta_rs = acos(k_zrs / k_s);
-    theta_tp = acos(k_ztp / k_tp);
-    theta_ts = 0;
+    theta_rs = acos(cn(k_zrs.real() / k_s.real(), 0.0f));
+    theta_tp = acos(cn(k_ztp.real() / k_tp.real(), 0.0f));
+    theta_ts = cn(0.0f, 0.0f); // No S-wave in fluid
 
-    // if (k_zrs.imag() > 0.0f) {
-    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_zrs.imag()));
-    // }
-    // if (k_ztp.imag() > 0.0f) {
-    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_ztp.imag()));
-    // }
-    // if (k_zts.imag() > 0.0f) {
-    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_zts.imag()));
-    // }
+    if (imag(k_zrs) < 0) {
+        // Wave is evanescent in the z-direction.
+        k_zrs = -k_zrs;
+    }
+
+    if (imag(k_ztp) < 0) {
+        // Wave is evanescent in the z-direction.
+        k_ztp = -k_ztp;
+    }
+
 
     Eigen::Matrix<cn, 3, 3> A;
 
@@ -334,14 +334,12 @@ void Interface::p_fluidToSolid()
     Eigen::Matrix<cn, 3, 1> x;
     x = A.colPivHouseholderQr().solve(b); 
 
-    std::cout << "A Matrix:\n" << A << std::endl;
-    std::cout << "b Vector:\n" << b << std::endl;
-    std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
-    std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
-    std::cout << "Determinant of A: " << A.determinant() << std::endl;
-    std::cout << "Solution x:\n" << x << std::endl;
-    // //std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
-    //std::cout << rpp*A(3,0) + tpp*A(3,2) << " == " << b(3) << std::endl;
+    // std::cout << "A Matrix:\n" << A << std::endl;
+    // std::cout << "b Vector:\n" << b << std::endl;
+    // std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
+    // std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
+    // std::cout << "Determinant of A: " << A.determinant() << std::endl;
+    // std::cout << "Solution x:\n" << x << std::endl;
 
     rp = x(0);
     rs = 0;
@@ -620,10 +618,20 @@ void Interface::s_solidToFluid()
     cn k_zrp = pow(sq(k_p)  - sq(k_xs), 0.5f);
     cn k_ztp = pow(sq(k_tp) - sq(k_xs), 0.5f);
     
-    theta_rs = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
-    theta_rp = acos(k_zrp / k_p);
-    theta_tp = acos(k_ztp / k_tp);
-    theta_ts = 0;
+    theta_rs = theta; // The angle of the reflected P-wave is the same as the incident P-wave.
+    theta_rp = acos(cn(k_zrp.real() / k_p.real(), 0.0f));
+    theta_tp = acos(cn(k_ztp.real() / k_tp.real(), 0.0f));  
+    theta_ts = cn(0.0f, 0.0f); // No S-wave in fluid
+
+    if (imag(k_zrp) < 0) {
+        // Wave is evanescent in the z-direction.
+        k_zrp = -k_zrp;
+    }
+
+    if (imag(k_ztp) < 0) {
+        // Wave is evanescent in the z-direction.
+        k_ztp = -k_ztp;
+    }     
 
     Eigen::Matrix<cn, 4, 3> A;
 

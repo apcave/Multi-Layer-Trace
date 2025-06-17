@@ -21,6 +21,9 @@ void Wave::accumulate( Wave& other) {
 }
 
 void Wave::print() const {
+    if (abs(p) == 0.0f) {
+        return; // Do not print if pressure is zero
+    }
     std::cout << "Wave Type: " << (type == Type::P ? "P" : "S") 
                 << ", Pressure: " << p 
                 << ", Angle: " << angle
