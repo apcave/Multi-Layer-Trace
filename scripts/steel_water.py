@@ -7,12 +7,13 @@ composite = Composite()
 
 def make_water_steel_water():
     # Define the properties of the composite
-    thickness = [0.0, 5e-3, 0.0]  # Thickness in meters
-    density = [1000.0, 7850.0, 1000.0]  # Density in kg/m^3
-    cp = [1480.0, 5960.0, 1480.0]  # P-wave speed in m/s
-    att_p = [0.01, 0.02, 0.01]  # P-wave attenuation
-    cs = [0.0, 3235.0, 0.0]  # S-wave speed in m/s
-    att_s = [0.0, 0.05, 0.0]  # S-wave attenuation
+    thickness = [0.0, 30e-3, 0.0]  # Thickness in meters
+    density = [1000.0, 900, 1000.0]  # Density in kg/m^3
+    cp = [1480.0, 1260.0, 1480.0]  # P-wave speed in m/s
+
+    att_p = [0.01, 0.2, 0.01]  # P-wave attenuation
+    cs = [0.0, 337, 0.0]  # S-wave speed in m/s
+    att_s = [0.0, 1, 0.0]  # S-wave attenuation
 
     composite.make_composite(thickness, density, cp, cs, att_p, att_s)
 
@@ -70,10 +71,10 @@ def make_solid_solid_solid():
 # make_solid_solid_solid()
 make_water_steel_water()
 # Set frequency and angle for the simulation
-#frequency = np.linspace(100, 20e3, 101)  # Frequency in Hz
+frequency = np.linspace(100, 20e3, 101)  # Frequency in Hz
 frequency = [10.0e3]  # Single frequency for the test
-#angle = np.linspace(0, 90, 91)  # Angle in degrees
-angle = [5]  # Angle in degrees
+angle = np.linspace(0, 90, 91)  # Angle in degrees
+#angle = [15]  # Angle in degrees
 is_compression = True
 
 composite.set_frequency(frequency)

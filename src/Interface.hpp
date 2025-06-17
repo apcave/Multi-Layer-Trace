@@ -50,6 +50,9 @@ class Interface {
 
         cn tpp, rpp;
 
+        float cp_1, cp_2; // Compression wave speeds
+        float cs_1, cs_2; // Shear wave speeds
+
         cn theta;
         cn theta_p, theta_s, theta_rp, theta_rs, theta_tp, theta_ts;
         cn rp, tp, rs, ts;

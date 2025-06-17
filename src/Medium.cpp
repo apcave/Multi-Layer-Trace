@@ -89,7 +89,7 @@ void Medium::calculateWaveNumbers(float omega)
 
     if (isSolid ) {
         //k_s = (omega / cs ) * ( j *( att_s / eta ) + 1.0f);
-        k_s = std::complex<float>(omega / cp, att_s / 8.68589f);
+        k_s = std::complex<float>(omega / cs, att_s / 8.68589f);
     }
     std::cout << "k_p : " << k_p << ", k_s: " << k_s << std::endl;
     std::cout << "eta :" << eta << std::endl;

@@ -165,6 +165,7 @@ Wave Material::attenuateForTransmission(Wave& wave_in)
 
     if ( abs(wave_in.p) > 10.0f )
     {
+        wave_in.print();
         std::cout << "Wave is amplifying error." << std::endl;
         throw std::runtime_error("Wave is amplifying error.");
     }
@@ -201,10 +202,10 @@ Wave Material::attenuateForTransmission(Wave& wave_in)
     }
 
     
-    // std::cout << "Transmission :" << std::endl;
+    std::cout << "Transmission :" << std::endl;
     // std::cout << "Scale: " << scale << ", " << abs(scale) << std::endl;
     // std::cout << "Distance: " << distance << std::endl;
-    // wave_in.print();
+    ///wave_in.print();
     // wave_out.print();
 
 

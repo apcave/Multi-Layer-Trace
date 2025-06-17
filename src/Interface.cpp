@@ -174,31 +174,40 @@ void Interface::p_solidToSolid()
 
 void Interface::p_solidToFluid()
 {
-    // std::cout << "Catch all Solid - Solid P-wave reflection and transmission\n";
+    std::cout << "Solid - Fluid P-wave reflection and transmission\n";
 
     theta_p = theta; // The angle of the incident P-wave.
     cn k_xp  = k_p*sin(theta_p);
     cn k_zp  = k_p*cos(theta_p);
 
+    std::cout << "k_s: " << k_s << ", k_p: " << k_p << std::endl;
+
     // For continuity of the x-axis component of the wave number vector.
     // For small ∂x, ∂z values attenuation is negligible.  
     cn k_zrs = pow(sq(k_s)  - sq(k_xp), 0.5f);
-    cn k_ztp = pow(sq(k_tp) - sq(k_xp), 0.5f);
+    // cn k_ztp = pow(sq(k_tp) - sq(k_xp), 0.5f);
+
+    // Snell's Law uses only the real part of the wave number.
+    cn sin_theta_t = (cp_2 / cp_1) * sin(theta_p);
+    theta_tp = asin(sin_theta_t);
+    cn k_ztp = cos(theta_tp) * k_tp;
 
     theta_rp = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
     theta_rs = acos(cn(k_zrs.real() / k_s.real(), 0.0f));
-    theta_tp = acos(cn(k_ztp.real() / k_tp.real(), 0.0f));
+    // theta_tp = acos(cn(k_ztp.real() / k_tp.real(), 0.0f));
     theta_ts = cn(0.0f, 0.0f); // No S-wave in fluid
 
     if (imag(k_zrs) < 0) {
         // Wave is evanescent in the z-direction.
+        std::cout << "Evanescent S-wave in solid to fluid transition." << std::endl;
         k_zrs = -k_zrs;
     }
 
-    if (imag(k_ztp) < 0) {
-        // Wave is evanescent in the z-direction.
-        k_ztp = -k_ztp;
-    }
+    // if (imag(k_ztp) < 0) {
+    //     // Wave is evanescent in the z-direction.
+    //     std::cout << "Evanescent P-wave in solid to fluid transition." << std::endl;
+    //     k_ztp = -k_ztp;
+    // }
 
 
     Eigen::Matrix<cn, 3, 3> A;
@@ -350,11 +359,10 @@ void Interface::p_fluidToSolid()
 std::vector<Wave> Interface::getSplitWaves( Wave& wave)
 {
     std::cout << "___________________________________________" << std::endl;
-    if (wave.type == Wave::Type::P) {
-        std::cout << " Incident P-wave  : " << wave.p << ", Angle: " << wave.angle << std::endl;
-    } else {
-        std::cout << " Incident S-wave  : " << wave.p << ", Angle: " << wave.angle << std::endl;
-    }
+    
+    std::cout << " Incident P-wave.\n" ;
+    wave.print();
+
 
     if (isnan(real(wave.p)) || isinf(real(wave.p)) ||
         isnan(imag(wave.p)) || isinf(imag(wave.p))) {
@@ -366,10 +374,10 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
     rho_1 = firstMedium->rho;
     rho_2 = secondMedium->rho;
 
-    float cp_1 = firstMedium->cp;
-    float cp_2 = secondMedium->cp;
-    float cs_1 = firstMedium->cs;
-    float cs_2 = secondMedium->cs;
+    cp_1 = firstMedium->cp;
+    cp_2 = secondMedium->cp;
+    cs_1 = firstMedium->cs;
+    cs_2 = secondMedium->cs;
 
   
     float att_p_1 = firstMedium->att_p*eta;
@@ -460,18 +468,11 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
 
     std::cout << "Boundary Values <<-------------------" << std::endl;
     // Always return four waves in the same order even if pressure is zero.
-    Wave Rp(Wave::Type::P, rp*wave.p, theta_rp);
-    Wave Ts(Wave::Type::S, ts*wave.p, theta_ts);
-    Wave Tp(Wave::Type::P, tp*wave.p, theta_tp);
-    Wave Rs(Wave::Type::S, rs*wave.p, theta_rs);
-
-
-    std::vector<Wave> result;
-    result.push_back(Rp);
-    result.push_back(Rs);
-    result.push_back(Tp);
-    result.push_back(Ts);
-
+    Wave Rp(Wave::Type::P, rp, theta_rp);
+    Wave Rs(Wave::Type::S, rs, theta_ts);
+    Wave Tp(Wave::Type::P, tp, theta_tp);
+    Wave Ts(Wave::Type::S, ts, theta_rs);
+    
     Rp.print();
     Rs.print();
     Tp.print();
@@ -511,6 +512,22 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
         throw std::runtime_error("Invalid angle calculation results.");
     }
 
+    if (abs(Rp.p) > 2.1f || abs(Rs.p) > 2.1f ||
+        abs(Tp.p) > 2.1f || abs(Ts.p) > 2.1f) {
+        std::cout << "Warning: Wave pressure exceeds threshold." << std::endl;
+        throw std::runtime_error("Wave pressure exceeds threshold.");
+    }
+
+    Rp.p *= wave.p;
+    Rs.p *= wave.p;
+    Tp.p *= wave.p;
+    Ts.p *= wave.p;
+
+    std::vector<Wave> result;
+    result.push_back(Rp);
+    result.push_back(Rs);
+    result.push_back(Tp);
+    result.push_back(Ts);
 
     return result;
 }

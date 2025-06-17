@@ -49,5 +49,6 @@
     "variant": "cpp",
     "valarray": "cpp",
     "tuple": "cpp"
-  }
+  },
+  "cmake.sourceDirectory": "/Users/alexandercave/Coding/Alex-Portfolio/Multi-Layer-Trace/src"
 }

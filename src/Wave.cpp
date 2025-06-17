@@ -6,7 +6,7 @@ bool Wave::operator==( Wave& other)  {
     if (type != other.type) {
         return false; // Different types cannot be equal
     }
-    if (abs(angle - other.angle) >= 1e-6f) {
+    if (abs(angle - other.angle) >= 1e-4f) {
         return false; // Angles are not equal within a small tolerance
     }
     return true;
