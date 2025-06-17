@@ -22,9 +22,12 @@ void Composite::properateWave( Wave& wave) {
     // Note zero is the top of the composite.
     mediums[0]->initialWave(wave);
 
+    Medium* topMedium = mediums[0];
+    Medium* bottomMedium = mediums[mediums.size() - 1];
+    
     bool allDone = true;
     while (true) {
-    //for (int i = 0; i < 100; ++i) {
+    //for (int i = 0; i < 1; ++i) {
         std::cout << "Stepping waves in all mediums..." << std::endl;
         for (int i = 0; i < mediums.size(); ++i) {
             // Step the waves in the medium
@@ -37,6 +40,13 @@ void Composite::properateWave( Wave& wave) {
             break;
         }
         allDone = true;
+
+        std::cout << "*************************************************" << std::endl;
+        std::cout << "Reflected Waves..." << std::endl;
+        topMedium->printWaves();
+        std::cout << "Transmitted Waves..." << std::endl;
+        bottomMedium->printWaves();
+        std::cout << "*************************************************" << std::endl;
     }
 
     std::cout << "Composite::properateWave() completed." << std::endl;

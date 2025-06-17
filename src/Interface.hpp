@@ -12,6 +12,9 @@ T sq(T x) {
     return x * x;
 }
 
+
+
+
 class Interface {
 
     public:
@@ -20,7 +23,7 @@ class Interface {
 
         std::vector<Wave> getSplitWaves( Wave& wave);
 
-
+        static float eta; // Attenuation factor
     private:
         Medium* firstMedium;  // Pointer to the first medium
         Medium* secondMedium; // Pointer to the second medium

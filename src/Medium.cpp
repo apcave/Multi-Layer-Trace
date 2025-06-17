@@ -1,7 +1,7 @@
 #include "Medium.hpp"
 #include <cmath>
 
-float Medium::eta = 40.0f * M_PI * std::log10(std::exp(1.0f));
+float Medium::eta = 1/(40.0f * M_PI * std::log10(std::exp(1.0f)));
 std::complex<float> Medium::j = std::complex<float>(0.0f, 1.0f); // Imaginary unit for complex calculations
 
 Medium::Medium( float density, float cp, float cs, float att_p, float att_s)
@@ -26,6 +26,13 @@ bool Medium::stepWaves() {
 
 void Medium::matchWave(Wave& wave, std::vector<Wave>& waveVector)
 {
+    if (wave.isSurfaceWave()) {
+        // If the wave is a surface wave, it should not be added to the wave vector.
+        // Surface waves are handled separately.
+        std::cout << "Surface wave detected, not adding to wave vector." << std::endl;
+        return;
+    }
+
     // Add waves together if the have the same reflection angle.
     for (auto& w : waveVector) {
         if( wave == w ) {
@@ -78,17 +85,31 @@ void Medium::setLayerBelow(Medium* medium)
 void Medium::calculateWaveNumbers(float omega)
 {
     //k_p = (omega / cp ) * ( j *( att_p / eta ) + 1.0f);
-    k_p = omega / std::complex<float>(cp, att_p);
+    k_p = std::complex<float>(omega / cp, att_p / 8.68589f);
 
     if (isSolid ) {
         //k_s = (omega / cs ) * ( j *( att_s / eta ) + 1.0f);
-        k_s = omega / std::complex<float>(cs, att_s);
-
+        k_s = std::complex<float>(omega / cp, att_s / 8.68589f);
     }
+    std::cout << "k_p : " << k_p << ", k_s: " << k_s << std::endl;
+    std::cout << "eta :" << eta << std::endl;
 }
 
 void Medium::clearWaves()
 {
     surface_pc.clear();
     surface_ps.clear();
+}
+
+void Medium::printWaves()
+{
+    std::cout << "Surface P-waves:" << std::endl;
+    for (const auto& wave : surface_pc) {
+        wave.print();
+    }
+
+    std::cout << "Surface S-waves:" << std::endl;
+    for (const auto& wave : surface_ps) {
+        wave.print();
+    }
 }

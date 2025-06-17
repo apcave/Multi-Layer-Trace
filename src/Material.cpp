@@ -158,29 +158,59 @@ Wave Material::attenuateForTransmission(Wave& wave_in)
     // Attenuate the wave for transmission through the material.
     // This is a simple model where the wave is attenuated by a factor of 1/e per wavelength.
     // The attenuation factor is based on the wave's type (P or S) and the material's properties.
-    std::complex<float> j = std::complex<float>(1, 0.0f);
+    std::complex<float> j = std::complex<float>(0.0f, 1.0f);
+
 
     std::complex<float> distance  = thickness / cos(wave_in.angle);
+
+    if ( abs(wave_in.p) > 10.0f )
+    {
+        std::cout << "Wave is amplifying error." << std::endl;
+        throw std::runtime_error("Wave is amplifying error.");
+    }
 
     //float x_offset = thickness * tan(real(wave_in.angle));
 
     // std::cout << "Attenuating wave for transmission through material." << std::endl;
     // std::cout << "In Wave  :" << std::endl;
     // wave_in.print();
-    
+    std::cout << "Transmission :" << std::endl;
+
+    cn scale;
     Wave wave_out = wave_in;
     if (wave_in.type == Wave::Type::S) {
-        wave_out.p *= exp(-j*k_s*distance);
+        scale = exp(j*k_s*distance);
+        wave_out.p *= scale;
+        std::cout << "k_s: " << k_s << std::endl;
     } else {
-        wave_out.p *= exp(-j*k_p*distance);
+        scale = exp(j*k_p*distance);
+        wave_out.p *= scale;
+        std::cout << "k_p: " << k_p << std::endl;
+        std::cout << "test: " << j*k_p*distance << std::endl; 
     }
 
-    if(abs(wave_out.p) > abs(wave_in.p)) {
+    if(abs(scale) - 1 > 1e-6 || isnan(wave_out.p.real()) || isnan(wave_out.p.imag())) {
+        std::cout << "Distance: " << distance << std::endl;
+        std::cout << "p_in : " << wave_in.p << std::endl;
+        std::cout << "p_out: " << wave_out.p << std::endl;
+        
+        if (wave_in.type == Wave::Type::S) {
+            std::cout << "k_s: " << k_s << std::endl;
+            std::cout << "Scale: " << abs(exp(-j*k_s*distance)) << std::endl;
+        } else {
+            std::cout << "k_p" << k_p << std::endl;
+            std::cout << "Scale: " << abs(exp(-j*k_p*distance)) << std::endl;
+        }        
         throw std::runtime_error("Attenuated wave pressure is larger than input wave pressure.");
     }
 
-    // std::cout << "Out Wave :" << std::endl;
-    // wave_out.print();
+    
+
+    std::cout << "Scale: " << scale << ", " << abs(scale) << std::endl;
+    std::cout << "Distance: " << distance << std::endl;
+    wave_in.print();
+    wave_out.print();
+
 
     return wave_out;
 }

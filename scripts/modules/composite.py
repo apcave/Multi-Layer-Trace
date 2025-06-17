@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 from modules import ml_cave
 from modules import ml_levesque
@@ -57,8 +58,9 @@ class Composite:
         
         is_shear = 0 if self.is_compression else 1
         for freq in self.frequency:
-            for angle in self.angle:
-                self.cave.properateWave(1.0, 0.0, float(math.radians(angle)),
+            for ang in self.angle:
+                print(f"Running simulation for frequency: {freq} Hz, angle: {ang} degrees, shear: {is_shear}")
+                self.cave.properateWave(1.0, 0.0, float(math.radians(ang)),
                                         int(is_shear), float(freq))
                 self.fc_rp.append(self.cave.get_rp())
                 self.fc_tp.append(self.cave.get_tp())
@@ -68,29 +70,88 @@ class Composite:
     def plot_results(self):
         import matplotlib.pyplot as plt
         
-        if len(self.frequency) > 1:
-            plt.figure(figsize=(10, 6))
-            plt.plot(self.frequency, [abs(r) for r in self.fc_rp], label='Cave Rp')
-            plt.plot(self.frequency, [abs(t) for t in self.fc_tp], label='Cave Tp')
-            plt.plot(self.frequency, [abs(r) for r in self.fl_rp], label='Levesque Rp')
-            plt.plot(self.frequency, [abs(t) for t in self.fl_tp], label='Levesque Tp')
-            plt.xlabel('Frequency (Hz)')
-            plt.ylabel('Magnitude')
-            plt.title('Levesque Acoustic Simulation Results')
-            plt.legend()
-            plt.grid(True)
-            plt.show()
-        
-        if len(self.angle) > 1:
-            plt.figure(figsize=(10, 6))
-            plt.plot(self.angle, [abs(r) for r in self.fc_rp], label='Reflection Coefficient (P-wave)')
-            plt.plot(self.angle, [abs(t) for t in self.fc_tp], label='Transmission Coefficient (P-wave)')
-            plt.xlabel('Angle (degrees)')
-            plt.ylabel('Magnitude')
-            plt.title('Cave Acoustic Simulation Results')
-            plt.legend()
-            plt.grid(True)
-            plt.show()
+        # Prepare data
+        freq_or_angle = self.frequency if len(self.frequency) > 1 else self.angle
+        x_label = 'Frequency (Hz)' if len(self.frequency) > 1 else 'Angle (degrees)'
+
+        # Your theory (fc_*)
+        rp = np.array(self.fc_rp)
+        rs = np.array(self.fc_rs)
+        tp = np.array(self.fc_tp)
+        ts = np.array(self.fc_ts)
+        abs_rp = np.abs(rp)
+        abs_rs = np.abs(rs)
+        abs_tp = np.abs(tp)
+        abs_ts = np.abs(ts)
+        phase_rp = np.angle(rp, deg=True)
+        phase_rs = np.angle(rs, deg=True)
+        phase_tp = np.angle(tp, deg=True)
+        phase_ts = np.angle(ts, deg=True)
+
+        # Others (fl_*)
+        l_rp = np.array(self.fl_rp)
+        l_rs = np.array(self.fl_rs)
+        l_tp = np.array(self.fl_tp)
+        l_ts = np.array(self.fl_ts)
+        abs_l_rp = np.abs(l_rp)
+        abs_l_rs = np.abs(l_rs)
+        abs_l_tp = np.abs(l_tp)
+        abs_l_ts = np.abs(l_ts)
+        phase_l_rp = np.angle(l_rp, deg=True)
+        phase_l_rs = np.angle(l_rs, deg=True)
+        phase_l_tp = np.angle(l_tp, deg=True)
+        phase_l_ts = np.angle(l_ts, deg=True)
+
+        fig, axs = plt.subplots(2, 2, figsize=(11.69, 8.27))
+
+        # Top-left: |rp| and |rs|
+        axs[0, 0].plot(freq_or_angle, abs_rp, label='|rp| (theory)', color='C0')
+        axs[0, 0].plot(freq_or_angle, abs_rs, label='|rs| (theory)', color='C1')
+        axs[0, 0].plot(freq_or_angle, abs_l_rp, '--', label='|rp| (other)', color='C0')
+        axs[0, 0].plot(freq_or_angle, abs_l_rs, '--', label='|rs| (other)', color='C1')
+        axs[0, 0].set_ylabel('Magnitude')
+        axs[0, 0].set_xlabel(x_label)
+        axs[0, 0].set_title('Reflection Magnitude')
+        axs[0, 0].grid(True)
+        axs[0, 0].legend()
+        axs[0, 0].set_ylim(0, 2)  # Set y-limits for better visibility
+
+        # Bottom-left: |tp| and |ts|
+        axs[1, 0].plot(freq_or_angle, abs_tp, label='|tp| (theory)', color='C2')
+        axs[1, 0].plot(freq_or_angle, abs_ts, label='|ts| (theory)', color='C3')
+        axs[1, 0].plot(freq_or_angle, abs_l_tp, '--', label='|tp| (other)', color='C2')
+        axs[1, 0].plot(freq_or_angle, abs_l_ts, '--', label='|ts| (other)', color='C3')
+        axs[1, 0].set_ylabel('Magnitude')
+        axs[1, 0].set_xlabel(x_label)
+        axs[1, 0].set_title('Transmission Magnitude')
+        axs[1, 0].grid(True)
+        axs[1, 0].legend()
+        axs[1, 0].set_ylim(0, 2)  # Set y-limits for better visibility
+
+        # Top-right: phase of rp and rs
+        axs[0, 1].plot(freq_or_angle, phase_rp, label='Phase rp (theory)', color='C0')
+        axs[0, 1].plot(freq_or_angle, phase_rs, label='Phase rs (theory)', color='C1')
+        axs[0, 1].plot(freq_or_angle, phase_l_rp, '--', label='Phase rp (other)', color='C0')
+        axs[0, 1].plot(freq_or_angle, phase_l_rs, '--', label='Phase rs (other)', color='C1')
+        axs[0, 1].set_ylabel('Phase (degrees)')
+        axs[0, 1].set_xlabel(x_label)
+        axs[0, 1].set_title('Reflection Phase')
+        axs[0, 1].grid(True)
+        axs[0, 1].legend()
+
+        # Bottom-right: phase of tp and ts
+        axs[1, 1].plot(freq_or_angle, phase_tp, label='Phase tp (theory)', color='C2')
+        axs[1, 1].plot(freq_or_angle, phase_ts, label='Phase ts (theory)', color='C3')
+        axs[1, 1].plot(freq_or_angle, phase_l_tp, '--', label='Phase tp (other)', color='C2')
+        axs[1, 1].plot(freq_or_angle, phase_l_ts, '--', label='Phase ts (other)', color='C3')
+        axs[1, 1].set_ylabel('Phase (degrees)')
+        axs[1, 1].set_xlabel(x_label)
+        axs[1, 1].set_title('Transmission Phase')
+        axs[1, 1].grid(True)
+        axs[1, 1].legend()
+
+        plt.tight_layout()
+        plt.show()
         
     @property        
     def l_rp(self):

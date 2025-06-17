@@ -27,6 +27,7 @@ class Medium
         virtual void addWavesTop(Wave& tp, Wave& ts);
         virtual void addWavesBottom(Wave& tp, Wave& ts);
         void calculateWaveNumbers(float omega);
+        void printWaves();
 
         friend class Interface; // Allow Interface to access private members
 
@@ -54,6 +55,7 @@ class Medium
         std::complex<float> k_s; // Complex wave number for S-wave   
         
         static std::complex<float> j; // Imaginary unit for complex calculations
-        static float eta; // Attenuation factor
  
+    private:
+        static float eta;
 };

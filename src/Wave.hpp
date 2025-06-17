@@ -30,11 +30,8 @@ class Wave
         bool operator==( Wave& other) ;
         void clear();
         void accumulate( Wave& other);
-        void print() const {
-            std::cout << "Wave Type: " << (type == Type::P ? "P" : "S") 
-                      << ", Pressure: " << p 
-                      << ", Angle: " << angle << std::endl;
-        }
+        void print() const;
+        bool isSurfaceWave();
 
 
     public:

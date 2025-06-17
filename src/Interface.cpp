@@ -4,6 +4,9 @@
 #include <complex>
 #include <Eigen/Dense>
 
+
+float Interface::eta = 1.0f/(40*log10(std::exp(1.0f))* M_PI);
+
 void Interface::p_fluidToFluid()
 {
     std::cout << "Fluid - Fluid P-wave reflection and transmission\n";
@@ -16,8 +19,14 @@ void Interface::p_fluidToFluid()
     cn k_ztp = pow(sq(k_tp) - sq(k_xp), 0.5f);
 
     theta_rp = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
-    theta_tp = acos(k_ztp / k_tp);
+    theta_rs = cn(0.0f,0.0f);
+    theta_tp = acos(cn(k_ztp.real() / k_tp.real(), 0.0f));
+    theta_ts = cn(0.0f,0.0f);
 
+    if (imag(k_ztp) < 0) {
+        // Wave is evanescent in the z-direction.
+        k_ztp = -k_ztp;
+    }
 
     // Eigen::Matrix<cn, 2, 2> A; 
     // A(0,0) = -k_zp; // z-axis velocity 
@@ -51,8 +60,8 @@ void Interface::p_fluidToFluid()
     tpp = 2.0f * rho_1 * k_zp / (k_ztp * rho_1 + k_zp * rho_2);
     rpp = (rho_2 * k_zp - rho_1 * k_ztp) / (rho_2 * k_zp + rho_1 * k_ztp);
 
-    printf("tpp : %f + %fi\n", real(tpp), imag(tpp));
-    printf("rpp : %f + %fi\n", real(rpp), imag(rpp));
+    // printf("tpp : %f + %fi\n", real(tpp), imag(tpp));
+    // printf("rpp : %f + %fi\n", real(rpp), imag(rpp));
 
    // std::cout << rpp*A(0,0) + tpp*A(0,1) << " == " << b(0) << std::endl;
    // std::cout << rpp*A(1,0) + tpp*A(1,1) << " == " << b(1) << std::endl;
@@ -165,7 +174,7 @@ void Interface::p_solidToSolid()
 
 void Interface::p_solidToFluid()
 {
-    std::cout << "Catch all Solid - Solid P-wave reflection and transmission\n";
+    // std::cout << "Catch all Solid - Solid P-wave reflection and transmission\n";
 
     theta_p = theta; // The angle of the incident P-wave.
     cn k_xp  = k_p*sin(theta_p);
@@ -176,9 +185,6 @@ void Interface::p_solidToFluid()
     cn k_zrs = pow(sq(k_s)  - sq(k_xp), 0.5f);
     cn k_ztp = pow(sq(k_tp) - sq(k_xp), 0.5f);
     cn k_zts = pow(sq(k_ts) - sq(k_xp), 0.5f);
-
-    std::cout << "k_xp: " << k_xp << ", k_zp: " << k_zp << std::endl;
-    std::cout << "k_zrs: " << k_zrs << ", k_ztp: " << k_ztp << ", k_zts: " << k_zts << std::endl;
 
     theta_rp = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
     theta_rs = acos(k_zrs / k_s);
@@ -241,13 +247,13 @@ void Interface::p_solidToFluid()
     Eigen::Matrix<cn, 3, 1> x;
     x = A.colPivHouseholderQr().solve(b); 
 
-    std::cout << "A Matrix:\n" << A << std::endl;
-    std::cout << "b Vector:\n" << b << std::endl;
-    std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
-    std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
-    std::cout << "Determinant of A: " << A.determinant() << std::endl;
-    std::cout << "Solution x:\n" << x << std::endl;
-    // std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
+    // std::cout << "A Matrix:\n" << A << std::endl;
+    // std::cout << "b Vector:\n" << b << std::endl;
+    // std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
+    // std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
+    // std::cout << "Determinant of A: " << A.determinant() << std::endl;
+    // std::cout << "Solution x:\n" << x << std::endl;
+    // // std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
     // std::cout << rpp*A(3,0) + tpp*A(3,2) << " == " << b(3) << std::endl;
 
     rp = x(0);
@@ -262,25 +268,35 @@ void Interface::p_fluidToSolid()
     cn k_xp  = k_p*sin(theta_p);
     cn k_zp  = k_p*cos(theta_p);
 
-    // For continuity of the x-axis component of the wave number vector.
-    // For small ∂x, ∂z values attenuation is negligible.  
+    /**
+     * pow() finds the positive square root of the argument.
+     * This root is used for the angle calculations.
+     * If the imaginary part of the wave number is negative,
+     * the wave is evanescent in the z-direction.
+     * So the root is swapped for the rest of the calculations.
+     * So the order, root, angles, possible swapping is important.
+     */
+
+    // For continuity of the x-axis component of the wave number vector.  
     cn k_ztp = pow(sq(k_tp) - sq(k_xp), 0.5f);
     cn k_zts = pow(sq(k_ts) - sq(k_xp), 0.5f);
 
-    theta_rp = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
-    theta_rs = 0; // The angle of the reflected S-wave is zero in this case.
-    theta_tp = acos(k_ztp / k_tp);
-    theta_ts = acos(k_zts / k_ts);
 
-    // if (k_zrs.imag() > 0.0f) {
-    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_zrs.imag()));
-    // }
-    // if (k_ztp.imag() > 0.0f) {
-    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_ztp.imag()));
-    // }
-    // if (k_zts.imag() > 0.0f) {
-    //     throw std::runtime_error("Invalid k_zs value: " + std::to_string(k_zts.imag()));
-    // }
+    // Snell's Law uses only the real part of the wave number.
+    theta_rp = theta_p; // The angle of the reflected P-wave is the same as the incident P-wave.
+    theta_rs = cn(0.0f,0.0f); // The angle of the reflected S-wave is zero in this case.
+    theta_tp = acos(cn(k_ztp.real(), 0.0f) / cn(k_tp.real(), 0.0f));
+    theta_ts = acos(cn(k_zts.real(), 0.0f) / cn(k_ts.real(), 0.0f));
+
+    if (imag(k_ztp) < 0) {
+        // Wave is evanescent in the z-direction.
+        k_ztp = -k_ztp;
+    }
+
+    if (imag(k_zts) < 0) {
+        // Wave is evanescent in the z-direction.
+        k_zts = -k_zts;
+    } 
 
     Eigen::Matrix<cn, 3, 3> A;
 
@@ -324,7 +340,7 @@ void Interface::p_fluidToSolid()
     std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
     std::cout << "Determinant of A: " << A.determinant() << std::endl;
     std::cout << "Solution x:\n" << x << std::endl;
-    //std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
+    // //std::cout << rpp*A(0,0) + tpp*A(0,2) << " == " << b(0) << std::endl;
     //std::cout << rpp*A(3,0) + tpp*A(3,2) << " == " << b(3) << std::endl;
 
     rp = x(0);
@@ -349,9 +365,6 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
     }
 
 
-    std::complex<float> j = std::complex<float>(0.0f, 1.0f);
-    cn pi4 = cn(M_PI/4, 0.0f);
-
     rho_1 = firstMedium->rho;
     rho_2 = secondMedium->rho;
 
@@ -360,38 +373,20 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
     float cs_1 = firstMedium->cs;
     float cs_2 = secondMedium->cs;
 
-    float eta = 1.0f/(40*log10(std::exp(1.0f))* M_PI); // Attenuation factor
-
+  
     float att_p_1 = firstMedium->att_p*eta;
     float att_p_2 = secondMedium->att_p*eta;
     float att_s_1 = firstMedium->att_s*eta;
     float att_s_2 = secondMedium->att_s*eta;
 
-    std::cout << "cp_1: " << cp_1 << ", cs_1: " << cs_1 << ", att_p_1: " << att_p_1 << ", att_s_1: " << att_s_1 << std::endl;
-    std::cout << "cp_2: " << cp_2 << ", cs_2: " << cs_2 << ", att_p_2: " << att_p_2 << ", att_s_2: " << att_s_2 << std::endl;
-
     float f = Wave::omega / (2.0f * M_PI); // Frequency in Hz
     float omega = Wave::omega; // Angular frequency in radians per second
     float omega2 = sq(omega); // Square of the angular frequency
-
-    float lambda_p = cp_1 / f;
-    float lambda_s = cs_1 / f;
-    float lambda_tp = cp_2 / f;
-    float lambda_ts = cs_2 / f;
-    
-    float alpha_p = lambda_p * att_p_1;
-    float alpha_s = lambda_s * att_s_1;
-    float alpha_tp = lambda_tp * att_p_2;
-    float alpha_ts = lambda_ts * att_s_2;
     
     k_p = firstMedium->k_p;
     k_s = firstMedium->k_s;
     k_tp = secondMedium->k_p;
     k_ts = secondMedium->k_s;
-
-    std::cout << "k_p: " << k_p << ", k_s: " << k_s << std::endl;
-    std::cout << "k_tp: " << k_tp << ", k_ts: " << k_ts << std::endl;
-    std::cout << "rho_1: " << rho_1 << ", rho_2: " << rho_2 << std::endl;
 
     mu_1 = rho_1*sq(cn(cs_1,att_s_1));
     M_1  = rho_1*sq(cn(cp_1,att_p_1));
@@ -399,32 +394,73 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
     mu_2 = rho_2*sq(cn(cs_2,att_s_2));
     M_2  = rho_2*sq(cn(cp_2,att_p_2));
 
-
-    // cn mu_1 = rho_1*sq(cs_1)/sq(cn(1,alpha_s/eta));
-    // cn M_1  = rho_1*sq(cp_1)/sq(cn(1,alpha_p/eta));
     lambda_1 = M_1 - (2.0f * mu_1);
-
-    // cn mu_2 = rho_2*sq(cs_2)/sq(cn(1,alpha_ts/eta));
-    // cn M_2  = rho_2*sq(cp_2)/sq(cn(1,alpha_tp/eta));
     lambda_2 = M_2 - (2.0f * mu_2);    
-
 
     theta = wave.angle;
 
     // ************ Solid - Solid *****************************
-    if ( true || firstMedium->isSolid == true && secondMedium->isSolid == true ) {
+    if ( firstMedium->isSolid == true && secondMedium->isSolid == true ) {
         if (wave.type == Wave::Type::P) {
             p_solidToSolid();
-            p_fluidToFluid();
-            p_solidToSolid();
-            p_solidToFluid();
         } else {
             s_solidToSolid();
+        }
+    }
+
+    // ************ Solid - Fluid *****************************
+    if ( firstMedium->isSolid == true && secondMedium->isSolid == false ) {
+        if (wave.type == Wave::Type::P) {
+            p_solidToFluid();
+        } else {
             s_solidToFluid();
         }
     }
 
+    // ************ Fluid - Solid *****************************
+    if ( firstMedium->isSolid == false && secondMedium->isSolid == true ) {
+        if (wave.type == Wave::Type::P) {
+            std::cout << "Fluid - Solid P-wave reflection and transmission\n";
+            p_fluidToSolid();
+        } else {
+            throw std::runtime_error("S-wave reflection from fluid to solid is not implemented.");
+        }
+    }
 
+    // ************ Fluid - Fluid *****************************
+    if ( firstMedium->isSolid == false && secondMedium->isSolid == false ) {
+        if (wave.type == Wave::Type::P) {
+            p_fluidToFluid();
+        } else {
+            throw std::runtime_error("S-wave reflection from fluid to fluid is not implemented.");
+        }
+    }    
+
+
+
+
+    if(!(abs(theta_rp.real() - (M_PI / 2.0f)) < 1e-6f))
+    {
+        theta_rp = std::complex<float>(theta_rp.real(), 0.0f);
+    }
+
+    if(!(abs(theta_rs.real() - (M_PI / 2.0f)) < 1e-6f))
+    {
+        theta_rs = std::complex<float>(theta_rs.real(), 0.0f);
+    }    
+
+    if(!(abs(theta_tp.real() - (M_PI / 2.0f)) < 1e-6f))
+    {
+        theta_tp = std::complex<float>(theta_tp.real(), 0.0f);
+    }
+
+    if(!(abs(theta_ts.real() - (M_PI / 2.0f)) < 1e-4f))
+    {
+        theta_ts = std::complex<float>(theta_ts.real(), 0.0f);
+    }
+
+
+    std::cout << "Boundary Values <<-------------------" << std::endl;
     // Always return four waves in the same order even if pressure is zero.
     Wave Rp(Wave::Type::P, rp*wave.p, theta_rp);
     Wave Ts(Wave::Type::S, ts*wave.p, theta_ts);
@@ -438,11 +474,24 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
     result.push_back(Tp);
     result.push_back(Ts);
 
-    std::cout << "Boundary Values <<-------------------" << std::endl;
-    std::cout << "Reflected P-wave  : " << abs(rp) << ", Angle: " << theta_rp << std::endl;
-    std::cout << "Reflected S-wave  : " << abs(rs) << ", Angle: " << theta_rs << std::endl;
-    std::cout << "Transmitted P-wave: " << abs(tp) << ", Angle: " << theta_tp << std::endl;
-    std::cout << "Transmitted S-wave: " << abs(ts) << ", Angle: " << theta_ts << std::endl;
+    Rp.print();
+    Rs.print();
+    Tp.print();
+    Ts.print();
+
+    if ( imag(theta_rp) < 0.0f || imag(theta_rs) < 0.0f ||
+         imag(theta_tp) < 0.0f || imag(theta_ts) < 0.0f ) {
+        std::cout << "Warning: Negative imaginary part in angles." << std::endl;
+        throw std::runtime_error("Invalid angle values.");
+    }
+
+    if (real(theta_rp) < 0.0f || real(theta_rs) < 0.0f ||
+        real(theta_tp) < 0.0f || real(theta_ts) < 0.0f ) {
+        std::cout << "Warning: Negative real part in angles." << std::endl;
+        throw std::runtime_error("Invalid angle values.");
+    }
+
+
 
     if (isnan(real(rp)) || isinf(real(rp)) ||
         isnan(real(rs)) || isinf(real(rs)) ||
@@ -453,7 +502,7 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
         isnan(imag(tp)) || isinf(imag(tp)) ||
         isnan(imag(ts)) || isinf(imag(ts))) {
         std::cout << "Warning: NaN or Inf detected in wave calculations." << std::endl;
-        //throw std::runtime_error("Invalid wave calculation results.");
+        throw std::runtime_error("Invalid wave calculation results.");
     }
 
     if (isnan(abs(theta_rp)) || isinf(abs(theta_rp)) ||
@@ -461,12 +510,8 @@ std::vector<Wave> Interface::getSplitWaves( Wave& wave)
         isnan(abs(theta_tp)) || isinf(abs(theta_tp)) ||
         isnan(abs(theta_ts)) || isinf(abs(theta_ts))) {
         std::cout << "Warning: NaN or Inf detected in angle calculations." << std::endl;
-        //throw std::runtime_error("Invalid angle calculation results.");
+        throw std::runtime_error("Invalid angle calculation results.");
     }
-
-
-
-
 
 
     return result;
@@ -485,7 +530,7 @@ void Interface::setSecondMedium(Medium* medium)
 
 void Interface::s_solidToSolid()
 {
-    std::cout << "Solid - Solid S-wave reflection and transmission\n";
+    //std::cout << "Solid - Solid S-wave reflection and transmission\n";
 
     theta_s = theta; // The angle of the incident P-wave.
     cn k_xs  = k_s*sin(theta_s);
@@ -549,12 +594,12 @@ void Interface::s_solidToSolid()
     Eigen::Matrix<cn, 4, 1> x;
     x = A.colPivHouseholderQr().solve(b); 
 
-    std::cout << "A Matrix:\n" << A << std::endl;
-    std::cout << "b Vector:\n" << b << std::endl;
-    std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
-    std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
-    std::cout << "Determinant of A: " << A.determinant() << std::endl;
-    std::cout << "Solution x:\n" << x << std::endl;
+    // std::cout << "A Matrix:\n" << A << std::endl;
+    // std::cout << "b Vector:\n" << b << std::endl;
+    // std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
+    // std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
+    // std::cout << "Determinant of A: " << A.determinant() << std::endl;
+    // std::cout << "Solution x:\n" << x << std::endl;
 
     rp = x(0);
     rs = x(1);
@@ -564,7 +609,7 @@ void Interface::s_solidToSolid()
 
 void Interface::s_solidToFluid()
 {
-    std::cout << "Solid - Fluid S-wave reflection and transmission\n";
+    // std::cout << "Solid - Fluid S-wave reflection and transmission\n";
 
     theta_s = theta; // The angle of the incident P-wave.
     cn k_xs  = k_s*sin(theta_s);
@@ -580,32 +625,39 @@ void Interface::s_solidToFluid()
     theta_tp = acos(k_ztp / k_tp);
     theta_ts = 0;
 
-    Eigen::Matrix<cn, 3, 3> A;
+    Eigen::Matrix<cn, 4, 3> A;
 
-    // Row 0: Conservation of x-axis displacement (u_z continuity)
+       // Row 0: Conservation of z-axis displacement (u_z continuity)
     A(0,0) =   k_xs;    // reflected P-wave (medium 1)
     A(0,1) =   k_zs;    // reflected S-wave (medium 1)
-    A(0,2) =   0;       // (decoupled) transmitted P-wave (medium 2)
-    
-    // Row 1: Conservation of z-axis displacement (u_x continuity)
+    A(0,2) =  -k_xs;   // transmitted P-wave (medium 2)
+
+    // Row 1: Conservation of x-axis displacement (u_x continuity)
     A(1,0) =   k_zrp;    // reflected P
     A(1,1) =  -k_xs;   // reflected S
     A(1,2) =   k_ztp;    // transmitted P
-    
-    // Row 2: Conservation of normal stress (T_zz continuity)
-    A(2,0) = -(lambda_1 * sq(k_p) + 2.0f * mu_1 * sq(k_zrp));  // reflected P
-    A(2,1) =  2.0f * mu_1 * k_xs * k_zs;                       // reflected S
-    A(2,2) =  M_2 * sq(k_tp);                                  // transmitted P
-    
 
-    Eigen::Matrix<cn, 3, 1> b;
+    // Row 2: Conservation of shear stress (T_xz continuity)
+    A(2,0) =  2.0f * mu_1 * k_xs * k_zrp;               // reflected P
+    A(2,1) =  mu_1 * (sq(k_zs) - sq(k_xs));             // reflected S
+    A(2,2) =  0;                                        // (coupled) transmitted P
+
+    // Row 3: Conservation of normal stress (T_zz continuity)
+    A(3,0) = -(lambda_1 * sq(k_p) + 2.0f * mu_1 * sq(k_zrp));  // reflected P
+    A(3,1) =  2.0f * mu_1 * k_xs * k_zs;                       // reflected S
+    A(3,2) =  M_2 * sq(k_tp);    // transmitted P
+
+
+    Eigen::Matrix<cn, 4, 1> b;
 
     // Incident P-wave displacement and stress at z = 0
-    b(0) =  k_zs;                                           // -∂ϕ_inc/∂z
+    b(0) =  -k_zs;                                           // -∂ϕ_inc/∂z, sign change induced by reflecting off fluid.
     b(1) =  k_xs;                                           // -∂ϕ_inc/∂x
-    b(2) =  2.0f * mu_1 * k_xs * k_zs;                      // T_zz from incident P
+    b(2) = -mu_1 * (sq(k_zs) - sq(k_xs));                   // -T_xz from incident P
+    b(3) =  2.0f * mu_1 * k_xs * k_zs;                      // T_zz from incident P
 
-    for (int i = 0; i < 3; ++i) {
+
+    for (int i = 0; i < 4; ++i) {
         float sc = std::max(std::abs(A(i,0)), std::abs(A(i,1)));
         sc = std::max(sc, std::abs(A(i,2)));
         sc = std::max(sc, std::abs(b(i)));
@@ -616,12 +668,11 @@ void Interface::s_solidToFluid()
     Eigen::Matrix<cn, 3, 1> x;
     x = A.colPivHouseholderQr().solve(b); 
 
-    std::cout << "A Matrix:\n" << A << std::endl;
-    std::cout << "b Vector:\n" << b << std::endl;
-    std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
-    std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
-    std::cout << "Determinant of A: " << A.determinant() << std::endl;
-    std::cout << "Solution x:\n" << x << std::endl;
+    // std::cout << "A Matrix:\n" << A << std::endl;
+    // std::cout << "b Vector:\n" << b << std::endl;
+    // std::cout << "Rank: " << A.fullPivLu().rank() << std::endl;
+    // std::cout << "Residual: A * x - b = \n" << (A * x - b).norm() << std::endl;
+    // std::cout << "Solution x:\n" << x << std::endl;
 
     rp = x(0);
     rs = x(1);
